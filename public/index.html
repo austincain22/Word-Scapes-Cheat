@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+    <title>Word Scapes Cheat</title>
 
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/5.7.2/firebase-app.js"></script>
@@ -53,7 +53,7 @@
     function getWords()
     {
       $("#place-words").empty();
-      var str1 = document.getElementById("letters").value;
+      var str1 = document.getElementById("letters").value.toLowerCase();
       var array1 = [];
       for (var x = 0, y=1; x < str1.length; x++,y++) {
        array1[x]=str1.substring(x, y);
