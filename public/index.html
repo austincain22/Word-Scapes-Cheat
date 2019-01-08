@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to Firebase Hosting</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/5.7.2/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/5.7.2/firebase-auth.js"></script>
+    <script defer src="/__/firebase/5.7.2/firebase-database.js"></script>
+    <script defer src="/__/firebase/5.7.2/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/5.7.2/firebase-storage.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+
+    <style media="screen">
+      body { background-image: url("background.jpg"); color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; height: 100%; background-position: center;background-repeat: no-repeat; background-size: cover;}
+      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
+      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
+      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+      #message button { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
+      #message button { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
+      #message, #message button { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); border: none; }
+      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
+      @media (max-width: 600px) {
+        body, #message { margin-top: 0; background: white; box-shadow: none; }
+        body { border-top: 16px solid #ffa100; }
+      }
+    </style>
+  </head>
+
+
+  <body>
+    <div class="bg"></div>
+
+    <div id="message">
+      <h2>Welcome</h2>
+      <h1>Word Scapes Cheat</h1>
+      <p>It's pretty simple. Type in the letters and the minimum length the word can be, and badda bing badda boom. It might not get every word or it might give too many words, because it uses words in the dictionary.</p>
+      <input id="letters" placeholder="letters">
+      <input id="length" placeholder="minimum length">
+      <button onclick="getWords()">Calculate Words</button>
+      <div id="place-words">
+        
+      </div>
+    </div>
+  </body>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+  <script>
+    //Write a JavaScript function that generates all combinations of a string.
+    function getWords()
+    {
+      $("#place-words").empty();
+      var str1 = document.getElementById("letters").value;
+      var array1 = [];
+      for (var x = 0, y=1; x < str1.length; x++,y++) {
+       array1[x]=str1.substring(x, y);
+      }
+      var combi = [];
+      var temp= "";
+      var slent = Math.pow(2, array1.length);
+
+      for (var i = 0; i < slent ; i++)
+      {
+          temp= "";
+          for (var j=0;j<array1.length;j++) {
+              if ((i & Math.pow(2,j))){ 
+                  temp += array1[j];
+              }
+          }
+          if (temp !== "")
+          {
+              combi.push(temp);
+          }
+      }
+      console.log(combi.join("\n"));
+      filterWords(combi);
+    }
+
+    //get all permutations of a string
+    function getAllPermutations(string) {
+      var results = [];
+      if (string.length === 1) {
+        results.push(string);
+        return results;
+      }
+      for (var i = 0; i < string.length; i++) {
+        var firstChar = string[i];
+        var charsLeft = string.substring(0, i) + string.substring(i + 1);
+        var innerPermutations = getAllPermutations(charsLeft);
+        for (var j = 0; j < innerPermutations.length; j++) {
+          results.push(firstChar + innerPermutations[j]);
+        }
+      }
+      return results;
+    }
+
+    //filter out bad words
+    function filterWords(arr){
+      var len = parseInt(document.getElementById("length").value);
+      var filtered = [];
+      for(var i = 0; i < arr.length; ++i){
+        if(arr[i].length >= len){
+            filtered.push(arr[i])
+        }
+      }
+      console.log(filtered.join("\n"));
+      var ans = [];
+      for(var i = 0; i < filtered.length; ++i){
+        ans.push(getAllPermutations(filtered[i]));
+      }
+      removeDups(ans);
+    }
+
+    //removes duplicates and makes it a single array rather than a 2-D array
+    function removeDups(arr){
+      var ans = [];
+      for (var i = 0; i < arr.length; ++i) {
+        for(var j = 0; j < arr[i].length; ++j){
+          if((!ans.includes(arr[i][j]))){
+            ans.push(arr[i][j]);
+          }
+        }
+      }
+      console.log(ans);
+      printing(ans);
+    }
+
+    //Prints out the words that are in the dictionary
+    function printing(arr){
+      var xmlhttp = new XMLHttpRequest();
+      xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var myObj = JSON.parse(this.responseText);    //parses json file and stores it in myObj
+          var words = document.getElementById('place-words');
+            for(var i = 0; i < arr.length; ++i){
+                for(var k = 0; k < 26; ++k){
+                  if(myObj[k].hasOwnProperty(arr[i])){
+                    var word = document.createElement('P');
+                    word.innerHTML = arr[i];
+                    words.appendChild(word);
+                  }
+              }
+            }
+        }
+      };
+      xmlhttp.open("GET", "dict.json", true);
+      xmlhttp.send();
+    }
+  </script>
+</html>
